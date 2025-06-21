@@ -10,6 +10,7 @@ export async function GET(request, { params }) {
   return NextResponse.json(task);
 }
 
+
 export async function PUT(request, { params }) {
   const data = await request.json();
   const taskUpdated = await prisma.task.update({
