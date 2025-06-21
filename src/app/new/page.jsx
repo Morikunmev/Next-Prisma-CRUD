@@ -1,25 +1,56 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import React, { useState, useEffect } from "react";
+
 function NewPage() {
   const router = useRouter();
+  const params = useParams();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    if (params.id) {
+      fetch(`/api/tasks/${params.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setTitle(data.title);
+          setDescription(data.description);
+        });
+    }
+  }, [params.id]);
   const onSubmit = async (e) => {
     e.preventDefault();
-    const title = e.target.title.value;
-    const description = e.target.description.value;
 
-    const res = await fetch("/api/tasks", {
-      method: "POST",
-      body: JSON.stringify({
-        title,
-        description,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    if (params.id) {
+      const res = await fetch(`/api/tasks/${params.id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          title, // <- Del state
+          description, // <- Del state
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+    } else {
+      // CREAR - Usa los valores del form
+      const title = e.target.title.value;
+      const description = e.target.description.value;
 
-    const data = await res.json();
-    console.log(data);
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        body: JSON.stringify({
+          title,
+          description,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+    }
+
     router.push("/");
   };
 
@@ -39,6 +70,8 @@ function NewPage() {
               id="title"
               name="title"
               placeholder="Título"
+              onChange={(e) => setTitle(e.target.value)}
+              value={title}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
             />
           </div>
@@ -55,6 +88,8 @@ function NewPage() {
               name="description"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none h-24 text-black"
               placeholder="Descripción"
+              onChange={(e) => setDescription(e.target.value)}
+              value={description}
             />
           </div>
 
@@ -64,6 +99,21 @@ function NewPage() {
           >
             Crear
           </button>
+          {params.id && (
+            <button
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+              type="button"
+              onClick={async () => {
+                const res = await fetch(`/api/tasks/${params.id}`, {
+                  method: "DELETE",
+                });
+                const data = await res.json();
+                router.push("/");
+              }}
+            >
+              Delete
+            </button>
+          )}
         </div>
       </form>
     </div>
