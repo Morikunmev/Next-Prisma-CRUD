@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
 import { prisma } from "../../../libs/prisma";
 
 export async function GET() {
@@ -16,8 +15,6 @@ export async function POST(request) {
         description: data.description,
       },
     });
-    
-    revalidatePath('/'); // ← Esto regenera la página home inmediatamente
     return NextResponse.json(newTask);
   } catch (error) {
     return NextResponse.json(
