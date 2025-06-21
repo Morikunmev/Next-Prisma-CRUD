@@ -1,12 +1,11 @@
 import { prisma } from "../libs/prisma";
 import TaskCard from "../components/TaskCard";
+
 async function loadTasks() {
-  // Obteniendo de la base de datos
-  // const res = await fetch("http://localhost:3000/api/tasks");
-  // const data = await res.json();
   return await prisma.task.findMany();
 }
 
+export const dynamic = "force-dynamic"; 
 async function HomePage() {
   const tasks = await loadTasks();
   return (
